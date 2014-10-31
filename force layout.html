@@ -1,0 +1,86 @@
+d3js-learning
+=============
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>D3: Force layout</title>
+		<script src="http://d3js.org/d3.v3.min.js"></script>
+		<style type="text/css">
+			/* No style rules here yet */
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+
+			//Width and height
+			var w = 500;
+			var h = 300;
+			
+			var dataedges = {};
+			var datanodes;
+			d3.csv("test2.csv", function(error,data){
+				console.log(data);
+				dataedges = data;
+				//console.log(edges);
+				datanodes = {};
+			
+			dataedges.forEach(function(edge) {
+				
+  				edge.source = datanodes[edge.source] || (datanodes[edge.source] = {name: edge.source});
+  				edge.target = datanodes[edge.target] || (datanodes[edge.target] = {name: edge.target});
+			});
+			//Initialize a default force layout, using the nodes and edges in dataset
+			var force = d3.layout.force()
+								 .nodes(datanodes)
+								 .links(dataedges)
+								 .size([w, h])
+								 .linkDistance(50)
+								 .charge([-100])
+								 .start();
+
+			var colors = d3.scale.category10();
+
+			//Create SVG element
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", w)
+						.attr("height", h);
+			
+			//Create edges as lines
+			var edges = svg.selectAll("line")
+				.data(dataedges)
+				.enter()
+				.append("line")
+				.style("stroke", "#ccc")
+				.style("stroke-width", 1);
+			
+			//Create nodes as circles
+			var nodes = svg.selectAll("circle")
+				.data(datanodes)
+				.enter()
+				.append("circle")
+				.attr("r", 10)
+				.style("fill", function(d,i) {
+					return colors(i);
+				});
+			//console.log(dataedges);
+			
+			//Every time the simulation "ticks", this will be called
+			force.on("tick", function() {
+
+				edges.attr("x1", function(d) { return d.source.x; })
+					 .attr("y1", function(d) { return d.source.y; })
+					 .attr("x2", function(d) { return d.target.x; })
+					 .attr("y2", function(d) { return d.target.y; });
+			
+				nodes.attr("cx", function(d) { return d.x; })
+					 .attr("cy", function(d) { return d.y; });
+	
+			});
+			//console.log(datanodes);
+});
+    //console.log(datanodes);
+		</script>
+	</body>
+</html>
